@@ -40,8 +40,10 @@ from_json(Req, State) ->
     {true, Req2, State}.
 
 from_form(Req, State) ->
-    io:format("Got form POST~n"),
-    {true, Req, State}.
+    {ok, Body, Req2} = cowboy_req:body(Req),
+    io:format("Got form POST: ~p~n", [Body]),
+    erltwilio:add_sms(Body),
+    {true, Req2, State}.
 
 handle(Req, State) ->
     {ok, Req, State}.
