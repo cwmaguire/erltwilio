@@ -18,21 +18,26 @@
 
 -export([to_html/2]).
 -export([from_json/2]).
+-export([from_form/2]).
 -export([handle/2]).
 -export([init/3]).
 -export([rest_init/2]).
--export([allowed_methods/0]).
--export([content_types_accepted/0]).
--export([content_types_provided/0]).
+-export([allowed_methods/2]).
+-export([content_types_accepted/2]).
+-export([content_types_provided/2]).
 -export([terminate/3]).
 
 -record(state, {}).
 
 to_html(Req, State) ->
-    {"Hello from Erlang", Req, State}.
+    {"Hello from Erlang\n", Req, State}.
 
 from_json(Req, State) ->
     io:format("Got json POST~n"),
+    {true, Req, State}.
+
+from_form(Req, State) ->
+    io:format("Got form POST~n"),
     {true, Req, State}.
 
 handle(Req, State) ->
@@ -44,16 +49,18 @@ init({tcp, http}, _Req, _Opts) ->
 rest_init(Req, _Opts) ->
     {ok, Req, #state{}}.
 
-allowed_methods() ->
-    [<<"GET">>, <<"HEAD">>, <<"POST">>, <<"OPTIONS">>].
+allowed_methods(Req, State) ->
+    {[<<"GET">>, <<"HEAD">>, <<"POST">>, <<"OPTIONS">>], Req, State}.
 
 %% for POST/PUT, points to handler
-content_types_accepted() ->
-    [{<<"application">>, <<"json">>, '*'}, from_json].
+content_types_accepted(Req, State) ->
+    {[{{<<"application">>, <<"json">>, '*'}, from_json},
+      {{<<"application">>, <<"x-www-form-urlencoded">>, '*'}, from_form}],
+     Req, State}.
 
 %% For GET requests, points to handler
-content_types_provided() ->
-    [{{<<"text">>,<<"html">>,'*'}, to_html}]. %% This is the default
+content_types_provided(Req, State) ->
+    {[{{<<"text">>,<<"html">>,'*'}, to_html}], Req, State}. %% This is the default
 
 terminate(_, _, _) ->
     ok.
