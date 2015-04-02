@@ -1,1 +1,1 @@
-web: erl -pa ebin deps/*/eben -s erltwilio_app
+web: erl -pa ebin deps/*/ebin -noshell -noinput -s erltwilio_app
