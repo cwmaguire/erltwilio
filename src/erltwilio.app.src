@@ -3,7 +3,7 @@
   {vsn, "0.1.0"},
   {id, "git"},
   {modules, []},
-  {registered, []},
+  {registered, [erltwilio]},
   {applications, [
     kernel,
     stdlib,

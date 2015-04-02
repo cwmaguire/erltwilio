@@ -1,11 +1,15 @@
 -module(erltwilio_app).
 -behaviour(application).
 
+-export([start/0]).
 -export([start/2]).
 -export([stop/1]).
 
 -define(ANY_HOST, '_').
 -define(NO_OPTIONS, []).
+
+start() ->
+    application:ensure_all_started(erltwilio).
 
 start(_Type, _Args) ->
 
