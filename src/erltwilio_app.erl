@@ -12,14 +12,16 @@ start() ->
     application:ensure_all_started(erltwilio).
 
 start(_Type, _Args) ->
-
+    io:format(standard_error, "Started erltwilio app~n", []),
     Paths = [{"/", erltwilio_cowboy, ?NO_OPTIONS},
              {"/[...]", cowboy_static, {priv_dir, erltwilio, "static"}}],
     Routes = [{?ANY_HOST, Paths}],
     Port = case os:getenv("PORT") of
                false ->
+                   io:format(standard_error, "Couldn't find $PORT~n", []),
                    8080;
                EnvPort ->
+                   io:format(standard_error, "Found $PORT: ~p~n", [EnvPort]),
                    list_to_integer(EnvPort)
            end,
     Dispatch = cowboy_router:compile(Routes),
