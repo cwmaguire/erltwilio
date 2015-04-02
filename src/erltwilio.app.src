@@ -1,0 +1,16 @@
+{application, erltwilio, [
+  {description, "Twilio SMS-to-Email Web Server"},
+  {vsn, "0.1.0"},
+  {id, "git"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib,
+    runtime_tools,
+    cowboy,
+    jsx
+  ]},
+  {mod, {erltwilio_app, []}},
+  {env, []}
+]}.
