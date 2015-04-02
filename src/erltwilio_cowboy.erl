@@ -30,11 +30,14 @@
 -record(state, {}).
 
 to_html(Req, State) ->
-    {"Hello from Erlang\n", Req, State}.
+    SMS = [[SMS_, "<br>"] || SMS_ <- erltwilio:get_sms()],
+    {["SMS Messages:<br>", SMS], Req, State}.
 
 from_json(Req, State) ->
-    io:format("Got json POST~n"),
-    {true, Req, State}.
+    {ok, Body, Req2} = cowboy_req:body(Req),
+    io:format("Got json POST: ~p~n", [Body]),
+    erltwilio:add_sms(Body),
+    {true, Req2, State}.
 
 from_form(Req, State) ->
     io:format("Got form POST~n"),

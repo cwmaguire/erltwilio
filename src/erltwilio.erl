@@ -3,7 +3,8 @@
 
 %% API.
 -export([start_link/0]).
--export([handle/1]).
+-export([add_sms/1]).
+-export([get_sms/0]).
 
 %% gen_server.
 -export([init/1]).
@@ -13,26 +14,36 @@
 -export([terminate/2]).
 -export([code_change/3]).
 
--record(state, {
-}).
+-record(state, {sms = [] :: list()}).
+
+-define(MAX_SMS, 30).
 
 %% API.
 
 -spec start_link() -> {ok, pid()}.
 start_link() ->
-	gen_server:start_link(?MODULE, [], []).
+	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-handle(KeyEvent) ->
-    io:format("KeyEvent: ~p~n", [KeyEvent]).
+add_sms(SMS) ->
+    io:format("SMS: ~p~n", [SMS]),
+    gen_server:cast(?MODULE, {sms, SMS}).
+
+get_sms() ->
+    io:format("Get SMS~n"),
+    gen_server:call(?MODULE, get_sms).
 
 %% gen_server.
 
 init([]) ->
 	{ok, #state{}}.
 
+handle_call(get_sms, _From, #state{sms = SMS} = State) ->
+	{reply, SMS, State};
 handle_call(_Request, _From, State) ->
 	{reply, ignored, State}.
 
+handle_cast({sms, NewSMS}, #state{sms = SMS} = State) ->
+	{noreply, State#state{sms = [NewSMS | lists:sublist(SMS, ?MAX_SMS - 1)]}};
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 
