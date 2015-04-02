@@ -7,7 +7,6 @@
   {applications, [
     kernel,
     stdlib,
-    runtime_tools,
     cowboy,
     jsx
   ]},
