@@ -25,11 +25,9 @@ start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 add_sms(SMS) ->
-    io:format("SMS: ~p~n", [SMS]),
     gen_server:cast(?MODULE, {sms, SMS}).
 
 get_sms() ->
-    io:format("Get SMS~n"),
     gen_server:call(?MODULE, get_sms).
 
 %% gen_server.
@@ -43,7 +41,9 @@ handle_call(_Request, _From, State) ->
 	{reply, ignored, State}.
 
 handle_cast({sms, NewSMS}, #state{sms = SMS} = State) ->
-	{noreply, State#state{sms = [NewSMS | lists:sublist(SMS, ?MAX_SMS - 1)]}};
+    NewestMessages = lists:sublist(SMS, ?MAX_SMS - 1),
+    NewList = [{os:timestamp(), NewSMS} | NewestMessages],
+	{noreply, State#state{sms = NewList}};
 handle_cast(_Msg, State) ->
 	{noreply, State}.
 

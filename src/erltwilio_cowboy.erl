@@ -17,7 +17,6 @@
 -behaviour(cowboy_http_handler).
 
 -export([to_html/2]).
--export([from_json/2]).
 -export([from_form/2]).
 -export([handle/2]).
 -export([init/3]).
@@ -30,18 +29,11 @@
 -record(state, {}).
 
 to_html(Req, State) ->
-    SMS = [[SMS_, "<br>"] || SMS_ <- erltwilio:get_sms()],
-    {["SMS Messages:<br>", SMS], Req, State}.
-
-from_json(Req, State) ->
-    {ok, Body, Req2} = cowboy_req:body(Req),
-    io:format("Got json POST: ~p~n", [Body]),
-    erltwilio:add_sms(Body),
-    {true, Req2, State}.
+    Rows = [sms_to_list(SMS_) || SMS_ <- erltwilio:get_sms()],
+    {["SMS Messages:<br>", html_table(Rows)], Req, State}.
 
 from_form(Req, State) ->
-    {ok, Body, Req2} = cowboy_req:body(Req),
-    io:format("Got form POST: ~p~n", [Body]),
+    {ok, Body, Req2} = cowboy_req:body_qs(Req),
     erltwilio:add_sms(Body),
     {true, Req2, State}.
 
@@ -59,8 +51,7 @@ allowed_methods(Req, State) ->
 
 %% for POST/PUT, points to handler
 content_types_accepted(Req, State) ->
-    {[{{<<"application">>, <<"json">>, '*'}, from_json},
-      {{<<"application">>, <<"x-www-form-urlencoded">>, '*'}, from_form}],
+    {[{{<<"application">>, <<"x-www-form-urlencoded">>, '*'}, from_form}],
      Req, State}.
 
 %% For GET requests, points to handler
@@ -69,3 +60,19 @@ content_types_provided(Req, State) ->
 
 terminate(_, _, _) ->
     ok.
+
+html_table(Rows) ->
+    ["<table>", [html_row(Row) || Row <- Rows], "</table>"].
+
+html_row(Cols) ->
+    ["<tr>", [["<td>", Col, "</td>"] || Col <- Cols], "</tr>"].
+
+sms_to_list({Timestamp, SMS}) ->
+    Time = timestamp_to_list(Timestamp),
+    Body = proplists:get_value(<<"Body">>, SMS, "undefined"),
+    From = proplists:get_value(<<"From">>, SMS, "undefined"),
+    [Time, From, Body].
+
+timestamp_to_list(Timestamp) ->
+    {{Y,M,D},{H,Mi,S}} = calendar:now_to_datetime(Timestamp),
+    io_lib:format("~p/~p/~p ~p:~p:~p", [Y,M,D,H,Mi,S]).
