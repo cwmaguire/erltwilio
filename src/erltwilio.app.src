@@ -1,5 +1,5 @@
 {application, erltwilio, [
-  {description, "Twilio SMS-to-Email Web Server"},
+  {description, "Twilio SMS Web Server"},
   {vsn, "0.1.0"},
   {id, "git"},
   {modules, []},

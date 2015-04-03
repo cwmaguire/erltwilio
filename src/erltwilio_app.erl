@@ -14,8 +14,7 @@ start() ->
     application:ensure_all_started(erltwilio).
 
 start(_Type, _Args) ->
-    Paths = [{"/", erltwilio_cowboy, ?NO_OPTIONS},
-             {"/[...]", cowboy_static, {priv_dir, erltwilio, "static"}}],
+    Paths = [{"/", erltwilio_cowboy, ?NO_OPTIONS}],
     Routes = [{?ANY_HOST, Paths}],
     Port = port(),
     Dispatch = cowboy_router:compile(Routes),
